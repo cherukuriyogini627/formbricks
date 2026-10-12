@@ -138,6 +138,24 @@ export const FileUploadElementForm = ({
           childBorder
           customContainerClass="p-0"></AdvancedOptionToggle>
 
+        {/* Default file size info — always visible so survey creators know the limit (#5011) */}
+        <div className="rounded-md border border-slate-200 bg-slate-50 px-4 py-3">
+          <p className="text-sm text-slate-600">
+            <span className="font-semibold">
+              {t("workspace.surveys.edit.default_file_size_limit_label")}:{" "}
+            </span>
+            <span>
+              {isFormbricksCloud
+                ? t("workspace.surveys.edit.default_file_size_limit_cloud", {
+                    defaultSize: 10,
+                    maxSize:
+                      maxSizeInMBLimit >= 1024 ? `${maxSizeInMBLimit / 1024} GB` : `${maxSizeInMBLimit} MB`,
+                  })
+                : t("workspace.surveys.edit.default_file_size_limit_selfhosted", { defaultSize: 1024 })}
+            </span>
+          </p>
+        </div>
+
         <AdvancedOptionToggle
           isChecked={!!element.maxSizeInMB}
           onToggle={handleMaxSizeInMBToggle}
