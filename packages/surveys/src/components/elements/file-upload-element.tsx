@@ -366,6 +366,7 @@ export function FileUploadElement({
         videoUrl={element.videoUrl}
         placeholderText={t("errors.file_input.placeholder_text")}
         uploadingText={t("errors.file_input.uploading")}
+        maxSizeInMB={element.maxSizeInMB}
       />
     </form>
   );
