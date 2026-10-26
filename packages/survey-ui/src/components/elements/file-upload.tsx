@@ -68,6 +68,16 @@ interface UploadedFileItemProps {
   onDelete: (index: number, e: React.MouseEvent) => void;
 }
 
+function formatFileSize(bytes?: number): string | null {
+  if (bytes === undefined || bytes === null || Number.isNaN(bytes)) return null;
+  if (bytes === 0) return "0 Bytes";
+  const k = 1024;
+  const sizes = ["Bytes", "KB", "MB", "GB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  const formatted = Number.parseFloat((bytes / Math.pow(k, i)).toFixed(i === 0 ? 0 : 1));
+  return `${formatted} ${sizes[i]}`;
+}
+
 function UploadedFileItem({
   file,
   index,
@@ -102,6 +112,11 @@ function UploadedFileItem({
           title={file.name}>
           {file.name}
         </p>
+        {file.size !== undefined && (
+          <span className="text-muted-foreground text-center [font-size:calc(var(--fb-input-font-size)*0.8)]">
+            {formatFileSize(file.size)}
+          </span>
+        )}
       </div>
     </div>
   );
