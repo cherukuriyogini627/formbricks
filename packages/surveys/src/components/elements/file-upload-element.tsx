@@ -23,6 +23,7 @@ interface FileUploadElementProps {
 }
 
 const FILE_LIMIT = 25;
+const DEFAULT_MAX_FILE_SIZE_MB = 1024;
 
 export function FileUploadElement({
   element,
@@ -45,6 +46,7 @@ export function FileUploadElement({
   useTtc(element.id, ttc, setTtc, startTime, setStartTime, isCurrent);
   const { t } = useTranslation();
   const [fileNames, setFileNames] = useState<Record<string, string>>({});
+  const [fileSizes, setFileSizes] = useState<Record<string, number>>({});
 
   // Use centralized error message for required validation, file-specific errors for upload issues
   const errorMessage = centralizedErrorMessage || fileErrorMessage;
@@ -57,6 +59,7 @@ export function FileUploadElement({
         return {
           name: fileNames[url],
           url,
+          size: fileSizes[url],
         };
       }
 
@@ -82,6 +85,7 @@ export function FileUploadElement({
       return {
         name: fileName,
         url,
+        size: fileSizes[url],
       };
     });
   };
@@ -95,12 +99,17 @@ export function FileUploadElement({
     // Clear file-specific errors when user uploads files (centralized errors are cleared by block-conditional)
     setFileErrorMessage(undefined);
 
-    // Store names locally
+    // Store names and sizes locally
     const newFileNames: Record<string, string> = {};
+    const newFileSizes: Record<string, number> = {};
     files.forEach((f) => {
       newFileNames[f.url] = f.name;
+      if (f.size !== undefined) {
+        newFileSizes[f.url] = f.size;
+      }
     });
     setFileNames((prev) => ({ ...prev, ...newFileNames }));
+    setFileSizes((prev) => ({ ...prev, ...newFileSizes }));
 
     const urls = convertToStringArray(files);
     onChange({ [element.id]: urls });
@@ -167,14 +176,11 @@ export function FileUploadElement({
    */
   const validateFileSize = useCallback(
     async (file: File): Promise<boolean> => {
-      if (!element.maxSizeInMB) {
-        return true; // No size restriction
-      }
-
+      const maxLimit = element.maxSizeInMB ?? DEFAULT_MAX_FILE_SIZE_MB;
       const fileSizeInMB = file.size / (1024 * 1024);
-      if (fileSizeInMB > element.maxSizeInMB) {
+      if (fileSizeInMB > maxLimit) {
         setFileErrorMessage(
-          t("errors.file_input.file_size_exceeded_alert", { maxSizeInMB: element.maxSizeInMB })
+          t("errors.file_input.file_size_exceeded_alert", { maxSizeInMB: maxLimit })
         );
         return false;
       }
@@ -227,10 +233,11 @@ export function FileUploadElement({
         }
       }
 
-      if (sizeRejectedFiles.length > 0 && element.maxSizeInMB) {
+      const maxLimit = element.maxSizeInMB ?? DEFAULT_MAX_FILE_SIZE_MB;
+      if (sizeRejectedFiles.length > 0) {
         const fileNames = sizeRejectedFiles.join(", ");
         setFileErrorMessage(
-          t("errors.file_input.file_size_exceeded", { fileNames, maxSizeInMB: element.maxSizeInMB })
+          t("errors.file_input.file_size_exceeded", { fileNames, maxSizeInMB: maxLimit })
         );
       }
 
@@ -262,17 +269,20 @@ export function FileUploadElement({
               elementId: element.id,
             }
           );
-          return { name: file.name, url: uploadedUrl };
+          return { name: file.name, url: uploadedUrl, size: file.size };
         });
 
         const uploadedFiles = await Promise.all(uploadPromises);
 
-        // Store file names
+        // Store file names and sizes
         const newFileNames: Record<string, string> = {};
+        const newFileSizes: Record<string, number> = {};
         uploadedFiles.forEach((f) => {
           newFileNames[f.url] = f.name;
+          newFileSizes[f.url] = f.size;
         });
         setFileNames((prev) => ({ ...prev, ...newFileNames }));
+        setFileSizes((prev) => ({ ...prev, ...newFileSizes }));
 
         // Update value
         const newUrls = uploadedFiles.map((f) => f.url);
