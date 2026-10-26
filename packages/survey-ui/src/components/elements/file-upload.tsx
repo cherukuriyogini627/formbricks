@@ -57,6 +57,8 @@ interface FileUploadProps {
   placeholderText?: string;
   /** Text to display while uploading */
   uploadingText?: string;
+  /** Maximum allowed file size in MB — shown as a hint in the upload area */
+  maxSizeInMB?: number;
 }
 
 interface UploadedFileItemProps {
@@ -64,6 +66,16 @@ interface UploadedFileItemProps {
   index: number;
   disabled: boolean;
   onDelete: (index: number, e: React.MouseEvent) => void;
+}
+
+function formatFileSize(bytes?: number): string | null {
+  if (bytes === undefined || bytes === null || Number.isNaN(bytes)) return null;
+  if (bytes === 0) return "0 Bytes";
+  const k = 1024;
+  const sizes = ["Bytes", "KB", "MB", "GB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  const formatted = Number.parseFloat((bytes / Math.pow(k, i)).toFixed(i === 0 ? 0 : 1));
+  return `${formatted} ${sizes[i]}`;
 }
 
 function UploadedFileItem({
@@ -100,6 +112,11 @@ function UploadedFileItem({
           title={file.name}>
           {file.name}
         </p>
+        {file.size !== undefined && (
+          <span className="text-muted-foreground text-center [font-size:calc(var(--fb-input-font-size)*0.8)]">
+            {formatFileSize(file.size)}
+          </span>
+        )}
       </div>
     </div>
   );
@@ -149,6 +166,8 @@ interface UploadAreaProps {
   showUploader: boolean;
   ariaInvalid: boolean;
   ariaDescribedBy?: string;
+  /** Maximum allowed file size in MB — displayed as a hint below the placeholder */
+  maxSizeInMB?: number;
 }
 
 function UploadArea({
@@ -165,6 +184,7 @@ function UploadArea({
   showUploader,
   ariaInvalid,
   ariaDescribedBy,
+  maxSizeInMB,
 }: Readonly<UploadAreaProps>): React.JSX.Element | null {
   if (!showUploader) {
     return null;
@@ -198,6 +218,11 @@ function UploadArea({
         id={`${inputId}-label`}>
         {placeholderText}
       </span>
+      {maxSizeInMB !== undefined && (
+        <span className="text-muted-foreground text-center [font-size:calc(var(--fb-input-font-size)*0.85)]">
+          {`Max file size: ${maxSizeInMB >= 1024 ? `${maxSizeInMB / 1024} GB` : `${maxSizeInMB} MB`}`}
+        </span>
+      )}
       <input
         ref={fileInputRef}
         type="file"
@@ -236,6 +261,7 @@ function FileUpload({
   imageAltText,
   placeholderText = "Click or drag to upload files",
   uploadingText = "Uploading...",
+  maxSizeInMB,
 }: Readonly<FileUploadProps>): React.JSX.Element {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const errorAria = getElementErrorAria(inputId, errorMessage);
@@ -330,6 +356,7 @@ function FileUpload({
               showUploader={showUploader}
               ariaInvalid={errorAria.ariaInvalid}
               ariaDescribedBy={errorAria.ariaDescribedBy}
+              maxSizeInMB={maxSizeInMB}
             />
           </div>
         </div>

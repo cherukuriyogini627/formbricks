@@ -1,7 +1,7 @@
 "use client";
 
 import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { PlusIcon } from "lucide-react";
+import { PlusIcon, SparklesIcon } from "lucide-react";
 import Link from "next/link";
 import { type JSX, useMemo, useState } from "react";
 import { toast } from "react-hot-toast";
@@ -138,6 +138,24 @@ export const FileUploadElementForm = ({
           childBorder
           customContainerClass="p-0"></AdvancedOptionToggle>
 
+        {/* Default file size info — always visible so survey creators know the limit (#5011) */}
+        <div className="rounded-md border border-slate-200 bg-slate-50 px-4 py-3">
+          <p className="text-sm text-slate-600">
+            <span className="font-semibold">
+              {t("workspace.surveys.edit.default_file_size_limit_label")}:{" "}
+            </span>
+            <span>
+              {isFormbricksCloud
+                ? t("workspace.surveys.edit.default_file_size_limit_cloud", {
+                    defaultSize: 10,
+                    maxSize:
+                      maxSizeInMBLimit >= 1024 ? `${maxSizeInMBLimit / 1024} GB` : `${maxSizeInMBLimit} MB`,
+                  })
+                : t("workspace.surveys.edit.default_file_size_limit_selfhosted", { defaultSize: 1024 })}
+            </span>
+          </p>
+        </div>
+
         <AdvancedOptionToggle
           isChecked={!!element.maxSizeInMB}
           onToggle={handleMaxSizeInMBToggle}
@@ -195,6 +213,22 @@ export const FileUploadElementForm = ({
                   }}
                 />
               </p>
+            )}
+            {isFormbricksCloud && maxSizeInMBLimit <= 10 && (
+              <div className="mt-3 flex items-center justify-between rounded-md border border-amber-200 bg-amber-50/70 p-3">
+                <div className="flex items-center space-x-2">
+                  <SparklesIcon className="size-4 shrink-0 text-amber-600" />
+                  <p className="text-xs text-amber-800">
+                    {t("workspace.surveys.edit.upsell_file_size_banner")}
+                  </p>
+                </div>
+                <Link
+                  className="shrink-0 text-xs font-semibold text-amber-900 underline hover:text-amber-950"
+                  target="_blank"
+                  href={`/organizations/${workspace.organizationId}/settings/billing`}>
+                  {t("common.upgrade_plan")}
+                </Link>
+              </div>
             )}
           </label>
         </AdvancedOptionToggle>
