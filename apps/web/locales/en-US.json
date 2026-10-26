@@ -3495,6 +3495,7 @@
         "default_file_size_limit_cloud": "Files are limited to {defaultSize} MB by default. Your plan allows up to {maxSize} per file.",
         "default_file_size_limit_label": "Default file size limit",
         "default_file_size_limit_selfhosted": "Files are limited to {defaultSize} MB by default. Use \"Max file size\" below to set a custom limit.",
+        "upsell_file_size_banner": "Need file uploads up to 1 GB? Upgrade to a paid plan.",
         "default_language": "Default language",
         "delete_anyways": "Delete anyways",
         "delete_block": "Delete block",

@@ -1,7 +1,7 @@
 "use client";
 
 import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { PlusIcon } from "lucide-react";
+import { PlusIcon, SparklesIcon } from "lucide-react";
 import Link from "next/link";
 import { type JSX, useMemo, useState } from "react";
 import { toast } from "react-hot-toast";
@@ -213,6 +213,22 @@ export const FileUploadElementForm = ({
                   }}
                 />
               </p>
+            )}
+            {isFormbricksCloud && maxSizeInMBLimit <= 10 && (
+              <div className="mt-3 flex items-center justify-between rounded-md border border-amber-200 bg-amber-50/70 p-3">
+                <div className="flex items-center space-x-2">
+                  <SparklesIcon className="size-4 shrink-0 text-amber-600" />
+                  <p className="text-xs text-amber-800">
+                    {t("workspace.surveys.edit.upsell_file_size_banner")}
+                  </p>
+                </div>
+                <Link
+                  className="shrink-0 text-xs font-semibold text-amber-900 underline hover:text-amber-950"
+                  target="_blank"
+                  href={`/organizations/${workspace.organizationId}/settings/billing`}>
+                  {t("common.upgrade_plan")}
+                </Link>
+              </div>
             )}
           </label>
         </AdvancedOptionToggle>
